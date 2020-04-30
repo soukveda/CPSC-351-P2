@@ -2,10 +2,12 @@
 CPSC 351 PROJECT TWO
 
 **Group Members**
+
 Christopher Phongsa - cphongsa@csu.fullerton.edu
 
 
-**Programming Language used:***
+**Programming Language used:**
+
 C++
 
 
