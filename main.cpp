@@ -53,7 +53,7 @@ int main(/*int argc, char *argv[]*/) {
             --> difference between completion time and arrival time
             --> suggestion to store this in a data structure to later compute average turnaround time
         --> the MM will need to adjust the memory map to show newly freed space
-            --> need to choose a convenient memory map to represent memory map
+            --> need to choose a convenient data structure to represent memory map
 
     - when we are allocating free space:
         --> always choose the lower end of memory to allocate
