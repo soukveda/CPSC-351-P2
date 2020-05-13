@@ -5,6 +5,13 @@
 #include <queue>
 using namespace std;
 
+struct process {
+  int pid;
+  int arrivalTime, lifetime; //line2
+  int addrSpace, memSize; //line 3. if there are multiple address spaces, add multiple numbers to total memSize sum.
+  //example: if addrSpace = 2, then memSize is the next two numbers added up. 2 200 400
+}
+
 
 int main(/*int argc, char *argv[]*/) {
 
@@ -17,8 +24,8 @@ long int virtualClock = 0;
 char numProcess;
 
 // creating an empty queue
-queue<int> inputQueue;
-    
+queue<process> inputQueue, waitQueue;
+
 // prompt the user for a memory size; maximum size is 30,000
 fprintf(stderr, "Please enter in a memory size (must be <= 30,000): ");
 scanf("%ld", &memSize);
@@ -37,7 +44,7 @@ if(memSize > 30000) {
     - these should be multiples of memory size
     - display three options
 */
-    
+
 fprintf(stderr, "Please enter in a page size (1: 100, 2: 200, 3: 400): ");
 scanf("%ld", &pageSize);
 
@@ -52,14 +59,14 @@ fprintf(stderr, "Please enter the name of the workload file: ");
 scanf("%s", &filename);
 
 /*
-    The file should contain the following (will be listed sequentially)
+    The file should contain theint count = 0; following (will be listed sequentially)
     - int value N -> # of processes in file
     - 1st line: unique process identifier (PID)
     - 2nd line: time submitted (arrival time) to system
         --> lifetime after submission to main memory (lifetime in memory)
     - 3rd line: memory requirements (address space)
         --> NOTE: this is a sequence of >= 1 integers
-            - 1st int: # of 'pieces' of memory on the line
+            - 1st int: # of 'pieces' https://youtu.be/uHUDpQfMe1kof memory on the line
             - Following #'s denote the address spaces
                 --> totalling these ints to get the overall space requirements
 */
@@ -94,7 +101,7 @@ fprintf(stderr, "%c\n", numProcess);
 while(virtualClock <= 100,000){
     /*
         here's we expect to happen within the loop:
-        
+
         The Memory Manager (MM) will be invoked by the following checks:
         - if a new process arrives
             --> check the head of the input queue and see if we can allocate memory to it
@@ -113,8 +120,25 @@ while(virtualClock <= 100,000){
         - when writing to output file
             --> follow the format of the given out.txt(s)
     */
+    for (int i = 0; x < numProcess; x++) //will this loop go into the virtualclock loop?
 
-   
+      //get pId of inputQueue[i] and error check
+      //get arrival time and life time of inputQueue[i] and error check
+      //get the address space first of inputQueue[i] and error check
+      //read in the number for address space.
+      //int total = 0;
+
+      /*The Address Space line is a sequence of one or more integers separated by a single blank.
+      The first integer gives the number of 'pieces' of memory on the line.
+      This sequence denotes the total size of the address space of the process.
+      You simply sum these integers to get the overall space requirement.*/
+      //for (int j = 0; j < addrSpace; j++) loop through to add up all memory size nytes
+      //{
+          //read in first number for temp[j];
+          //total += temp[j]
+      //}
+      //inputQueue[i].memSize = total;
+    }
 
    virtualClock++;
 }
@@ -122,4 +146,4 @@ while(virtualClock <= 100,000){
 
 
 return 0;
-} 
+}
