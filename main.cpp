@@ -2,13 +2,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <vector>
+#include <iostream>
 #include <queue>
 using namespace std;
 
 struct process {
   int pid;
   int arrivalTime, lifeTime; //line2
-  int memPieces, memSize; //line 3. if there are multiple address spaces, add multiple numbers to total memSize sum.
+  int memPieces, memReq; //line 3. if there are multiple address spaces, add multiple numbers to total memSize sum.
   //example: if memPieces = 2, then memSize is the next two numbers added up. 2 200 400
 };
 
@@ -24,7 +26,7 @@ int main(/*int argc, char *argv[]*/) {
   char numProcess;
 
   // creating an empty queue
-  queue<process> inputQueue, waitQueue;
+  vector<process> inputQueue, waitQueue;
 
   // prompt the user for a memory size; maximum size is 30,000
   fprintf(stderr, "Please enter in a memory size (must be <= 30,000): ");
@@ -78,7 +80,7 @@ int main(/*int argc, char *argv[]*/) {
   //inputFile = fopen(&filename, "r");
   ifstream inputFile;
   inputFile.open(filename);
-  if (!inFile) {
+  if (!inputFile) {
     perror("Error reading file.");
     exit(-1);
   }
@@ -153,7 +155,7 @@ int main(/*int argc, char *argv[]*/) {
       inputFile >> temp; //Read in first value for memSize
       total += temp;
     }
-    waitQueue[i].memSize = total;
+    waitQueue[i].inputFile = total;
     }
   }
 
