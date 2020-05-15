@@ -69,7 +69,7 @@ int main() {
 
 
   // check to see if the page size is valid
-  if(pageSize != 100 && pageSize != 200 && pageSize != 400 ) {
+  if(pageSize != 1 && pageSize != 2 && pageSize != 3 ) {
       fprintf(stderr, "The page size is invalid: %ld\n", pageSize);
       exit(-1);
   }
@@ -108,7 +108,7 @@ int main() {
   // opening the file
   //inputFile = fopen(&filename, "r");
   ifstream inputFile;
-  inputFile.open(filename);
+  inputFile.open(&filename);
   if (!inputFile) {
     perror("Error reading file.");
     exit(-1);
@@ -175,8 +175,6 @@ int main() {
       exit(-1);
     }
 
-    //cout << tempProcess.memPieces << "";
-
     int total = 0;
     int temp = 0; //pieces of memSize
     for (int j = 0; j < tempProcess.memPieces; j++) {
@@ -188,16 +186,14 @@ int main() {
 
     waitQueue.push(tempProcess);
   }
-  
-  int freePages = memSize/pageSize;
-  vector<memPage> memoryMap;
-
-  int maxTime = 100000;
 
     //Memory map implementation.
     memPage begin;
     vector<memPage> memoryMap;
-    for (int k = 0; k < freePages; k++){
+    vector<int> turnAroundTimes;
+    int numOfPages = memSize/pageSize;
+    int finProcID = waitQueue.back().pid;
+    for (int k = 0; k < numOfPages; k++){
       begin.pageStart = k * pageSize;
       begin.pageEnd = ((k + 1) * pageSize) - 1;
       begin.pageNum = 0;
@@ -217,14 +213,14 @@ int main() {
       //Gets processes at time, adds to queue
       if (!waitQueue.empty()) 
       {       
-        waitTest = (frontP.arrivalTime == virtualClock) //Check to see if the arrival time of a processmatches the current time
+        waitTest = (frontP.arrivalTime == virtualClock); //Check to see if the arrival time of a processmatches the current time
         //If it does, go through
       }
 
       while (waitTest == true)
       {
         cout << "t= " << virtualClock << endl;
-        cout << "Process " << frontP.pid << " arrives".
+        cout << "Process " << frontP.pid << " arrives";
         inputQueue.push(frontP); //Push onto input queue
         waitQueue.pop(); //Remove from waiting queue
         getInputQueue(inputQueue);
@@ -238,7 +234,6 @@ int main() {
         }
       }
       bool pprint = true;
-    }
 
 
 
@@ -265,7 +260,7 @@ int main() {
       */
 
     // we need to clean out the pages that contained finished processes
-    for (int i = 0; i < freePages; i++){
+    for (int i = 0; i < numOfPages; i++){
         int procDone = 0;
 
         // if a memory reaches its end time, remove it from the memory map
@@ -274,7 +269,7 @@ int main() {
             memoryMap[i]._pid = -1;
             memoryMap[i].pageNum = 0;
             memoryMap[i].endTime = 0;
-            availablePages++;
+            freePages++;
         }
         
         // print out any processes that we are terminating
@@ -291,7 +286,7 @@ int main() {
     }
 
     // let's see if there is any available pages of main memory to allocate to processes in the input queue
-    while ((!inputQueue.empty()) && (availablePages >= inputQueue.front().memReq)) {
+    while ((!inputQueue.empty()) && (freePages >= inputQueue.front().memReq)) {
       if (print) {
         cout << "virtual clock = " << virtualClock << endl;
         print = false;
@@ -303,22 +298,22 @@ int main() {
       int i = 0;
 
       // if we reach the last process, we can set our maximum time to the end time of the process
-      if (memoryMap[i]._pid == lastProcID) {
-        maxTime = endT;
+      if (memoryMap[i]._pid == finProcID) {
+        timeLimit = endT;
       }
 
       memoryMap[i].arrivalTime = inputQueue.front().arrivalTime;
       turnAroundTimes.push_back(memoryMap[i].endTime - memoryMap[i].arrivalTime);
 
       // execute this until our input queue is empty or until there are no more available pages
-      while ((inputQueue.front().memReq != 0) && (i < freePages)) {
+      while ((inputQueue.front().memReq != 0) && (i < numOfPages)) {
         // check to see if there is available memory in our memory map
         if (memoryMap[i]._pid == -1) {
           memoryMap[i]._pid = inputQueue.front().pid;
           memoryMap[i].pageNum = pNum;
           memoryMap[i].endTime = endT;
-          pNum++
-          availablePages--;
+          pNum++;
+          freePages--;
           inputQueue.front().memReq--;
         }
         i++;
@@ -327,10 +322,11 @@ int main() {
     }
     
     // print our current memory map
-    if(printMap) {
-      printMemMap(memoryMap, freePages);
-    }
-     virtualClock++;
+    // if(printMap) {
+    //   printMemMap(memoryMap, numOfPages);
+    // }
+    virtualClock++;
+
   }
 
   // calculate the average turnaround time
