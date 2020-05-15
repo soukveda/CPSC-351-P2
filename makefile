@@ -2,10 +2,10 @@ all: main
 #all: $(CHAR) recv.o sender.o
 
 main: main.o
-	gcc -g -o main main.o
+	g++ -g -o main main.o
 
 main.o: main.cpp
-	gcc -c -g main.cpp
+	g++ -c -g main.cpp
 
 tar:
 	tar cvf p2-cphongsa.tar *.cpp *.h makefile *.pdf *.png

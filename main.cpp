@@ -3,28 +3,36 @@
 #include <unistd.h>
 #include <signal.h>
 #include <queue>
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <iomanip>
 using namespace std;
 
 struct process {
   int pid;
   int arrivalTime, lifeTime; //line2
-  int memPieces, memSize; //line 3. if there are multiple address spaces, add multiple numbers to total memSize sum.
+  int memPieces, memReq; //line 3. if there are multiple address spaces, add multiple numbers to total memSize sum.
   //example: if memPieces = 2, then memSize is the next two numbers added up. 2 200 400
 };
 
+struct memPage {
+  int pageStart, pageEnd, _pid, pageNum, arrivalTime, endTime;
+};
 
-int main(/*int argc, char *argv[]*/) {
+
+int main() {
 
   long int memSize = 0;
   long int pageSize = 0;
   char filename;
-  FILE * inputFile;
   size_t result;
   long int virtualClock = 0;
-  char numProcess;
+  int numProcess;
 
   // creating an empty queue
   queue<process> inputQueue, waitQueue;
+  process tempProcess;
 
   // prompt the user for a memory size; maximum size is 30,000
   fprintf(stderr, "Please enter in a memory size (must be <= 30,000): ");
@@ -77,8 +85,8 @@ int main(/*int argc, char *argv[]*/) {
   // opening the file
   //inputFile = fopen(&filename, "r");
   ifstream inputFile;
-  inputFile.open(filename);
-  if (!inFile) {
+  inputFile.open(&filename);
+  if (!inputFile) {
     perror("Error reading file.");
     exit(-1);
   }
@@ -99,17 +107,19 @@ int main(/*int argc, char *argv[]*/) {
 
   // have some kind of loop (perhaps while loop) to check the memory space and allocate the head of the input queue
 
-   // read the number of processes - change later
-      result = fread(&numProcess, 1, 1, inputFile);
+  // // read the number of processes - change later
+  // result = fread(&numProcess, 1, 1, inputFile);
 
-  // check to make sure we read the number of processes correctly
-  if (result != 1){
-      fputs("Reading number of processes error\n", stderr);
-      exit(-1);
-  }
-  fprintf(stderr, "%c\n", numProcess);
+  // // check to make sure we read the number of processes correctly
+  // if (result != 1){
+  //     fputs("Reading number of processes error\n", stderr);
+  //     exit(-1);
+  // }
 
-  for (int i = 0; x < numProcess; x++) { //will this loop go into the virtualclock loop?
+  inputFile >> numProcess;
+  fprintf(stderr, "%d\n", numProcess);
+
+  for (int i = 0; i < numProcess; i++) { //will this loop go into the virtualclock loop?
 
     //get pId of inputQueue[i] and error check
     //get arrival time and life time of inputQueue[i] and error check
@@ -129,36 +139,48 @@ int main(/*int argc, char *argv[]*/) {
     //inputQueue[i].memSize = total;
 
     //get id
-    inputFile >> waitQueue[i].pid;
+    inputFile >> tempProcess.pid;
+    //waitQueue.push(process.pid);
     if (inputFile.fail()) {
       perror("Error reading process id (line 1).");
       exit(-1);
     }
+    cout << tempProcess.pid << endl;
 
-    inputFile >> waitQueue[i].arrivalTime >> waitQueue[i].lifeTime;
+    //inputFile >> waitQueue.front().arrivalTime >> waitQueue.front().lifeTime;
+    inputFile >> tempProcess.arrivalTime >> tempProcess.lifeTime;
     if (inputFile.fail()) {
       perror("Error reading times (line 2).");
       exit(-1);
     }
-
-    inputFile >> waitQueue[i].memPieces;
+    cout << tempProcess.arrivalTime << " " << tempProcess.lifeTime << endl;
+    // inputFile >> waitQueue.front().memPieces;
+    inputFile >> tempProcess.memPieces;
     if (inputFile.fail()) {
       perror("Error reading address space (line 3).");
       exit(-1);
     }
 
+    //cout << tempProcess.memPieces << "";
+
     int total = 0;
     int temp = 0; //pieces of memSize
-    for (int j = 0; j < waitQueue[i].memPieces; j++) {
+    for (int j = 0; j < tempProcess.memPieces; j++) {
       inputFile >> temp; //Read in first value for memSize
       total += temp;
     }
-    waitQueue[i].memSize = total;
-    }
+    tempProcess.memReq = total;
+    cout << tempProcess.memPieces << " " << tempProcess.memReq << endl;
+
+    waitQueue.push(tempProcess);
   }
+  
+  int freePages = memSize/pageSize;
+  vector<memPage> memoryMap;
 
+  int maxTime = 100000;
 
-  while(virtualClock <= 100,000){
+  while(virtualClock != maxTime){
       /*
           here's we expect to happen within the loop:
 
@@ -181,10 +203,82 @@ int main(/*int argc, char *argv[]*/) {
               --> follow the format of the given out.txt(s)
       */
 
+    // we need to clean out the pages that contained finished processes
+    for (int i = 0; i < freePages; i++){
+        int procDone = 0;
+
+        // if a memory reaches its end time, remove it from the memory map
+        if(memoryMap[i].endTime == virtualClock) {
+            procDone = memoryMap[i]._pid;
+            memoryMap[i]._pid = -1;
+            memoryMap[i].pageNum = 0;
+            memoryMap[i].endTime = 0;
+            availablePages++;
+        }
+        
+        // print out any processes that we are terminating
+        if ((procDone != 0) && (pprint)) {
+            if (print) {
+              cout << "virtual clock = " << virtualClock << endl;
+              print = false; 
+            }
+            cout << "\t\tProcess " << procDone << " completes\n";
+            printMap = true;
+            pprint = false;
+        }
+        
+    }
+
+    // let's see if there is any available pages of main memory to allocate to processes in the input queue
+    while ((!inputQueue.empty()) && (availablePages >= inputQueue.front().memReq)) {
+      if (print) {
+        cout << "virtual clock = " << virtualClock << endl;
+        print = false;
+      }
+      cout << "\t\tMM moves Process " << inputQueue.front().pid << " to memory\n";
+      printMap = true;
+      int endT = virtualClock + inputQueue.front().lifeTime;
+      int pNum = 1;
+      int i = 0;
+
+      // if we reach the last process, we can set our maximum time to the end time of the process
+      if (memoryMap[i]._pid == lastProcID) {
+        maxTime = endT;
+      }
+
+      memoryMap[i].arrivalTime = inputQueue.front().arrivalTime;
+      turnAroundTimes.push_back(memoryMap[i].endTime - memoryMap[i].arrivalTime);
+
+      // execute this until our input queue is empty or until there are no more available pages
+      while ((inputQueue.front().memReq != 0) && (i < freePages)) {
+        // check to see if there is available memory in our memory map
+        if (memoryMap[i]._pid == -1) {
+          memoryMap[i]._pid = inputQueue.front().pid;
+          memoryMap[i].pageNum = pNum;
+          memoryMap[i].endTime = endT;
+          pNum++
+          availablePages--;
+          inputQueue.front().memReq--;
+        }
+        i++;
+      }
+      inputQueue.pop();
+    }
+    
+    // print our current memory map
+    if(printMap) {
+      printMemMap(memoryMap, freePages);
+    }
      virtualClock++;
   }
 
-
+  // calculate the average turnaround time
+  int total = 0;
+  for (int i = 0; i < turnAroundTimes.size(); i++) {
+    total += turnAroundTimes[i];
+  }
+  double turnAround = total / turnAroundTimes.size();
+  cout << "\nAverage Turnaround Time: " << fixed << setprecision(2) << turnAround << "\n" << endl;
 
   return 0;
 }
