@@ -26,7 +26,7 @@ int main(/*int argc, char *argv[]*/) {
   char numProcess;
 
   // creating an empty queue
-  vector<process> inputQueue, waitQueue;
+  queue<process> inputQueue, waitQueue;
 
   // prompt the user for a memory size; maximum size is 30,000
   fprintf(stderr, "Please enter in a memory size (must be <= 30,000): ");
@@ -50,10 +50,22 @@ int main(/*int argc, char *argv[]*/) {
   fprintf(stderr, "Please enter in a page size (1: 100, 2: 200, 3: 400): ");
   scanf("%ld", &pageSize);
 
+
   // check to see if the page size is valid
   if(pageSize != 100 && pageSize != 200 && pageSize != 400 ) {
       fprintf(stderr, "The page size is invalid: %ld\n", pageSize);
       exit(-1);
+  }
+  switch (pageSize) {
+    case 1:
+      pageSize = 100;
+      break;
+    case 2:
+      pageSize = 200;
+      break;
+    case 3:
+      pageSize = 400;
+      break;
   }
 
   //Get the number of free pages
@@ -119,31 +131,25 @@ int main(/*int argc, char *argv[]*/) {
     //read in the number for address space.
     //int total = 0;
 
-    /*The Address Space line is a sequence of one or more integers separated by a single blank.
-    The first integer gives the number of 'pieces' of memory on the line.
-    This sequence denotes the total size of the address space of the process.
-    You simply sum these integers to get the overall space requirement.*/
-    //for (int j = 0; j < addrSpace; j++) loop through to add up all memory size nytes
-    //{
-        //read in first number for temp[j];
-        //total += temp[j]
-    //}
-    //inputQueue[i].memSize = total;
+    process tempProcess;
 
     //get id
-    inputFile >> waitQueue[i].pid;
+    //inputFile >> waitQueue[i].pid;
+    inputFile >> tempProcess.pid;
     if (inputFile.fail()) {
       perror("Error reading process id (line 1).");
       exit(-1);
     }
 
-    inputFile >> waitQueue[i].arrivalTime >> waitQueue[i].lifeTime;
+    //inputFile >> waitQueue[i].arrivalTime >> waitQueue[i].lifeTime;
+    inputFile >> tempProcess.arrivalTime >> tempProcess.lifeTime;
     if (inputFile.fail()) {
       perror("Error reading times (line 2).");
       exit(-1);
     }
 
-    inputFile >> waitQueue[i].memPieces;
+    //inputFile >> waitQueue[i].memPieces;
+    inputFile >> tempProcess.memPieces;
     if (inputFile.fail()) {
       perror("Error reading address space (line 3).");
       exit(-1);
@@ -151,11 +157,12 @@ int main(/*int argc, char *argv[]*/) {
 
     int total = 0;
     int temp = 0; //pieces of memSize
-    for (int j = 0; j < waitQueue[i].memPieces; j++) {
+    for (int j = 0; j < tempProcess.memPieces; j++) {
       inputFile >> temp; //Read in first value for memSize
       total += temp;
     }
-    waitQueue[i].inputFile = total;
+    tempProcess.memReq = total;
+    waitQueue.push(tempProcess); 
     }
   }
 
