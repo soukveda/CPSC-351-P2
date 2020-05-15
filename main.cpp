@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <vector>
+#include <iostream>
 #include <queue>
 #include <fstream>
 #include <iostream>
@@ -17,8 +19,17 @@ struct process {
 };
 
 struct memPage {
-  int pageStart, pageEnd, _pid, pageNum, arrivalTime, endTime;
+	int pageStart, pageEnd, _pid, pageNum, arrivalTime, endTime;
 };
+
+void getInputQueue(queue<process> _inputQueue) {
+  cout << "Input Queue:[";
+  while (!_inputQueue.empty()) {
+    cout << _inputQueue.front().pid << " ";
+    _inputQueue.pop();
+  }
+  cout << "]" << endl;
+} 
 
 
 int main() {
@@ -56,10 +67,22 @@ int main() {
   fprintf(stderr, "Please enter in a page size (1: 100, 2: 200, 3: 400): ");
   scanf("%ld", &pageSize);
 
+
   // check to see if the page size is valid
   if(pageSize != 100 && pageSize != 200 && pageSize != 400 ) {
       fprintf(stderr, "The page size is invalid: %ld\n", pageSize);
       exit(-1);
+  }
+  switch (pageSize) {
+    case 1:
+      pageSize = 100;
+      break;
+    case 2:
+      pageSize = 200;
+      break;
+    case 3:
+      pageSize = 400;
+      break;
   }
 
   //Get the number of free pages
@@ -85,7 +108,7 @@ int main() {
   // opening the file
   //inputFile = fopen(&filename, "r");
   ifstream inputFile;
-  inputFile.open(&filename);
+  inputFile.open(filename);
   if (!inputFile) {
     perror("Error reading file.");
     exit(-1);
@@ -127,27 +150,18 @@ int main() {
     //read in the number for address space.
     //int total = 0;
 
-    /*The Address Space line is a sequence of one or more integers separated by a single blank.
-    The first integer gives the number of 'pieces' of memory on the line.
-    This sequence denotes the total size of the address space of the process.
-    You simply sum these integers to get the overall space requirement.*/
-    //for (int j = 0; j < addrSpace; j++) loop through to add up all memory size nytes
-    //{
-        //read in first number for temp[j];
-        //total += temp[j]
-    //}
-    //inputQueue[i].memSize = total;
+    process tempProcess;
 
     //get id
+    //inputFile >> waitQueue[i].pid;
     inputFile >> tempProcess.pid;
-    //waitQueue.push(process.pid);
     if (inputFile.fail()) {
       perror("Error reading process id (line 1).");
       exit(-1);
     }
     cout << tempProcess.pid << endl;
 
-    //inputFile >> waitQueue.front().arrivalTime >> waitQueue.front().lifeTime;
+    //inputFile >> waitQueue[i].arrivalTime >> waitQueue[i].lifeTime;
     inputFile >> tempProcess.arrivalTime >> tempProcess.lifeTime;
     if (inputFile.fail()) {
       perror("Error reading times (line 2).");
@@ -180,7 +194,54 @@ int main() {
 
   int maxTime = 100000;
 
-  while(virtualClock != maxTime){
+    //Memory map implementation.
+    memPage begin;
+    vector<memPage> memoryMap;
+    for (int k = 0; k < freePages; k++){
+      begin.pageStart = k * pageSize;
+      begin.pageEnd = ((k + 1) * pageSize) - 1;
+      begin.pageNum = 0;
+      begin._pid = -1;
+      begin.endTime = -1;
+      memoryMap.push_back(begin); //Push to the memory map
+    }
+
+    int timeLimit = 100000;
+
+    while (virtualClock != timeLimit) {
+      bool print = true;
+      bool waitTest = false;
+      bool printMap = false;
+      process frontP = waitQueue.front();
+
+      //Gets processes at time, adds to queue
+      if (!waitQueue.empty()) 
+      {       
+        waitTest = (frontP.arrivalTime == virtualClock) //Check to see if the arrival time of a processmatches the current time
+        //If it does, go through
+      }
+
+      while (waitTest == true)
+      {
+        cout << "t= " << virtualClock << endl;
+        cout << "Process " << frontP.pid << " arrives".
+        inputQueue.push(frontP); //Push onto input queue
+        waitQueue.pop(); //Remove from waiting queue
+        getInputQueue(inputQueue);
+        printMap = true;
+        print = false;
+        if (!waitQueue.empty()) {
+          waitTest = (frontP.arrivalTime == virtualClock); //Repeat loop if not empty
+        }
+        else { //if it is empty, leave the loop
+          waitTest = false;
+        }
+      }
+      bool pprint = true;
+    }
+
+
+
       /*
           here's we expect to happen within the loop:
 
@@ -281,4 +342,5 @@ int main() {
   cout << "\nAverage Turnaround Time: " << fixed << setprecision(2) << turnAround << "\n" << endl;
 
   return 0;
+
 }
