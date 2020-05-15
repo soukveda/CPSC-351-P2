@@ -14,6 +14,19 @@ struct process {
   //example: if memPieces = 2, then memSize is the next two numbers added up. 2 200 400
 };
 
+struct memPage {
+	int pageStart, pageEnd, _pid, pageNum, arrivalTime, endTime;
+};
+
+void getInputQueue(queue<process> _inputQueue) {
+  cout << "Input Queue:[";
+  while (!_inputQueue.empty()) {
+    cout << _inputQueue.front().pid << " ";
+    _inputQueue.pop();
+  }
+  cout << "]" << endl;
+} 
+
 
 int main(/*int argc, char *argv[]*/) {
 
@@ -164,10 +177,56 @@ int main(/*int argc, char *argv[]*/) {
     tempProcess.memReq = total;
     waitQueue.push(tempProcess); 
     }
-  }
 
 
-  while(virtualClock <= 100,000){
+    //Memory map implementation.
+    memPage begin;
+    vector<memPage> memoryMap;
+    for (int k = 0; k < freePages; k++){
+      begin.pageStart = k * pageSize;
+      begin.pageEnd = ((k + 1) * pageSize) - 1;
+      begin.pageNum = 0;
+      begin._pid = -1;
+      begin.endTime = -1;
+      memoryMap.push_back(begin); //Push to the memory map
+    }
+
+    int timeLimit = 100000;
+
+    while (virtualClock != timeLimit) {
+      bool print = true;
+      bool waitTest = false;
+      bool printMap = false;
+      process frontP = waitQueue.front();
+
+      //Gets processes at time, adds to queue
+      if (!waitQueue.empty()) 
+      {       
+        waitTest = (frontP.arrivalTime == virtualClock) //Check to see if the arrival time of a processmatches the current time
+        //If it does, go through
+      }
+
+      while (waitTest == true)
+      {
+        cout << "t= " << virtualClock << endl;
+        cout << "Process " << frontP.pid << " arrives".
+        inputQueue.push(frontP); //Push onto input queue
+        waitQueue.pop(); //Remove from waiting queue
+        getInputQueue(inputQueue);
+        printMap = true;
+        print = false;
+        if (!waitQueue.empty()) {
+          waitTest = (frontP.arrivalTime == virtualClock); //Repeat loop if not empty
+        }
+        else { //if it is empty, leave the loop
+          waitTest = false;
+        }
+      }
+      bool pprint = true;
+    }
+
+
+
       /*
           here's we expect to happen within the loop:
 
@@ -190,10 +249,9 @@ int main(/*int argc, char *argv[]*/) {
               --> follow the format of the given out.txt(s)
       */
 
-     virtualClock++;
-  }
 
 
 
   return 0;
+
 }
