@@ -11,7 +11,7 @@ tar:
 	tar cvf p2-cphongsa.tar *.cpp *.h makefile *.pdf *.png
 
 clean:
-	rm *.o main outputfile
+	rm *.o main outputfile	
 
 # target: dependencies
 # 	action
