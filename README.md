@@ -7,6 +7,10 @@ Christopher Phongsa - cphongsa@csu.fullerton.edu
 
 Jared Castaneda - jaredcast97@gmail.com
 
+Juan Toledo - toledojuan73@gmail.com
+
+Efrain Lozada Trujillo - efrainlozada84@csu.fullerton.edu
+
 **Programming Language used:**
 
 C++
