@@ -31,6 +31,8 @@ C++
 # Teamwork Distribution
 Christopher Phongsa - Worked on the Memory Manager and the MAKEFILE
 
+Jared Castaneda - Worked on initializing input and wait queues, reading processes in from files, and memory manager
+
 Juan Toledo - Typed the function to display the memory map output
 
 Efrain - Worked on the design and documentation of the project. Edited readme.
