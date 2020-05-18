@@ -31,3 +31,5 @@ C++
 # Teamwork Distribution
 
 Juan Toledo - Typed the function to display the memory map output
+
+Efrain - Worked on the design and documentation of the project. Edited readme.
