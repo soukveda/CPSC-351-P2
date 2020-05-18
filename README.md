@@ -29,6 +29,7 @@ C++
 
 
 # Teamwork Distribution
+Christopher Phongsa - Worked on the Memory Manager and the MAKEFILE
 
 Juan Toledo - Typed the function to display the memory map output
 
